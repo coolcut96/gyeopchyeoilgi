@@ -20,6 +20,8 @@ except Exception:
 TIER = "유료"   # 무료 서비스지만 풀 리포트를 값싼 하이쿠로
 PORT = int(os.environ.get("PORT", 8000))   # 호스팅이 지정하는 포트 자동 인식
 CONTACT = "coolcut96@gmail.com"            # 처리방침 문의처 (교체 가능)
+SITE_URL = "https://port-0-gyeopchyeoilgi-ms6u5ojjac33edd8.sel3.cloudtype.app"  # 배포 주소(og:image 절대경로용)
+OG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "og.png")     # 카톡 미리보기 썸네일
 
 # ── 남용 방지: IP별 요청 제한 (in-memory, 요금 폭탄·봇 스팸 차단) ──
 _RATE = {}                       # ip -> [timestamps]
@@ -331,7 +333,7 @@ function openBooks(e){e.preventDefault();document.getElementById('booksModal').c
 function closeBooks(){document.getElementById('booksModal').classList.add('hide');}
 function shareSite(){
   var url=location.origin+'/';
-  if(navigator.share){navigator.share({title:'겹쳐읽기 — 사주와 별로 보는 나',text:'사주와 점성술로 나를 교차 검토한 무료 리포트, 나도 받아봤어요 🌗',url:url}).catch(function(){});return;}
+  if(navigator.share){navigator.share({title:'사주와 별, 두 시계로 나를 겹쳐 봅니다',text:'사주와 점성술로 나를 교차 검토한 무료 리포트, 나도 받아봤어요 🌗',url:url}).catch(function(){});return;}
   if(navigator.clipboard){navigator.clipboard.writeText(url).catch(function(){});}
   var t=document.getElementById('copytoast');if(t){t.style.display='block';setTimeout(function(){t.style.display='none';},2000);}
 }
@@ -353,7 +355,15 @@ function submitForm(e){
 
 PAGE = ("<!DOCTYPE html><html lang=ko><head><meta charset=utf-8>"
         "<meta name=viewport content='width=device-width,initial-scale=1'>"
-        "<title>겹쳐읽기 무료 리포트</title><style>"+CSS+"</style></head>"
+        "<title>겹쳐읽기 · 사주와 점성술로 보는 나</title>"
+        "<meta property='og:title' content='사주와 별, 두 시계로 나를 겹쳐 봅니다'>"
+        "<meta property='og:description' content='생년월일시만 넣으면 사주와 점성술로 나를 교차 검토한 리포트를 무료로 받아보세요.'>"
+        "<meta property='og:type' content='website'>"
+        "<meta property='og:image' content='"+SITE_URL+"/og.png'>"
+        "<meta property='og:url' content='"+SITE_URL+"/'>"
+        "<meta name='twitter:card' content='summary_large_image'>"
+        "<meta name='twitter:image' content='"+SITE_URL+"/og.png'>"
+        "<style>"+CSS+"</style></head>"
         "<body><div id=sky></div><div class=wrap>%%BODY%%</div>"
         "<script>"+ """
 (function(){var NS="http://www.w3.org/2000/svg",J="#5f9280";
@@ -415,6 +425,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
         xff = self.headers.get("X-Forwarded-For")
         return xff.split(",")[0].strip() if xff else self.client_address[0]
     def do_GET(self):
+        if self.path.startswith("/og.png"):
+            try:
+                with open(OG_PATH, "rb") as fh: data = fh.read()
+                self.send_response(200); self.send_header("Content-Type", "image/png")
+                self.send_header("Content-Length", str(len(data))); self.end_headers(); self.wfile.write(data)
+            except FileNotFoundError:
+                self.send_response(404); self.end_headers()
+            return
         if self.path.startswith("/privacy"):
             self._send(privacy_page()); return
         if self.path.startswith("/books"):
