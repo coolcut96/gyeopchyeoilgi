@@ -267,12 +267,15 @@ button.go:active{transform:translateY(1px)}
 .stores{display:flex;flex-wrap:wrap;gap:8px}
 .store{flex:1;min-width:96px;text-align:center;text-decoration:none;padding:11px 10px;border-radius:10px;border:1.5px solid #d8d4cc;color:var(--ink);font-weight:700;font-size:13.5px;background:#fff}
 .store:hover{border-color:var(--gold);color:var(--gold)}
-.backlink{text-align:center;margin-top:6px}
-.backlink a{color:var(--ink-soft);font-size:13px}
+.backlink{text-align:center;margin-top:14px}
+.backlink a{color:var(--ink);font-size:14px;font-weight:600;text-decoration:underline}
 .modal{position:fixed;inset:0;z-index:20;overflow-y:auto;background:linear-gradient(170deg,var(--jade-1),var(--jade-2))}
 .modal .minner{max-width:640px;margin:0 auto;padding:0 18px 44px}
 .modalbar{position:sticky;top:0;background:rgba(250,253,251,.94);padding:14px 2px;margin-bottom:2px}
-.modalbar a{color:var(--ink);font-weight:700;font-size:14px;text-decoration:none}
+.modalbar a{display:inline-block;background:var(--ink);color:#f4f8f5;font-weight:700;font-size:13.5px;text-decoration:none;padding:9px 16px;border-radius:20px}
+.sharebtn{display:block;width:100%;margin-top:14px;padding:13px;border-radius:11px;background:#fff;border:1.5px solid var(--ink);color:var(--ink);font-weight:800;font-size:15px;cursor:pointer}
+.sharebtn:active{transform:translateY(1px)}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--ink);color:#eaf2ee;padding:11px 18px;border-radius:22px;font-size:13.5px;font-weight:700;z-index:40;display:none}
 @media(min-width:560px){.hero h1{font-size:30px}.card{padding:28px 30px}}
 """
 
@@ -317,6 +320,7 @@ FORM = """
 <div class="pagetitle"><h1>책 사러 가기</h1><p>편한 서점을 골라 주세요 — 어디서 사셔도 같은 책이에요.</p></div>
 %%BOOKSMODAL%%
 </div></div>
+<div id="copytoast" class="toast">링크가 복사됐어요 ✓</div>
 <script>
 var f=document.getElementById('f');
 function cal(){var m=(f.cal.value=='음력');document.getElementById('leapbox').className='chk'+(m?'':' hide');
@@ -325,6 +329,12 @@ function togTime(){var u=document.getElementById('tu').checked;hh.disabled=u;mm.
 function togCity(){document.getElementById('custombox').className=(city.value=='__custom__')?'':'hide';}
 function openBooks(e){e.preventDefault();document.getElementById('booksModal').classList.remove('hide');window.scrollTo(0,0);return false;}
 function closeBooks(){document.getElementById('booksModal').classList.add('hide');}
+function shareSite(){
+  var url=location.origin+'/';
+  if(navigator.share){navigator.share({title:'겹쳐읽기 — 사주와 별로 보는 나',text:'사주와 점성술로 나를 교차 검토한 무료 리포트, 나도 받아봤어요 🌗',url:url}).catch(function(){});return;}
+  if(navigator.clipboard){navigator.clipboard.writeText(url).catch(function(){});}
+  var t=document.getElementById('copytoast');if(t){t.style.display='block';setTimeout(function(){t.style.display='none';},2000);}
+}
 function submitForm(e){
   e.preventDefault();
   var out=document.getElementById('out');
@@ -393,7 +403,8 @@ def report_fragment(name, text, palja, warns):
     body_html = md(text).replace("</h2>", "</h2>\n" + who_line, 1)
     w = "".join(f'<div class="warn">⚠️ {html.escape(x)}</div>' for x in warns)
     return (w + f'<div class="report card">{body_html}</div>' + book_banner()
-            + '<div class="backlink"><a href="/">← 다른 사람도 보기</a></div>')
+            + '<button class="sharebtn" onclick="shareSite()">🔗 친구에게 소개하기</button>'
+            + '<div class="backlink"><a href="/">🔄 다른 사주 보기</a></div>')
 
 class Handler(http.server.BaseHTTPRequestHandler):
     def _send(self, s, code=200):
