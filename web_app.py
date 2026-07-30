@@ -263,7 +263,7 @@ FORM = """
 </div>
 <label class="chk"><input type="checkbox" name="tu" id="tu" onchange="togTime()"> 태어난 시각을 몰라요 <span class="muted">(정오 기준)</span></label>
 <label>출생지</label>
-<select name="city" id="city" onchange="togCity()">%%CITIES%%<option value="__custom__">▸ 목록에 없어요 (직접 검색)</option></select>
+<select name="city" id="city" required onchange="togCity()"><option value="" disabled selected>출생지를 선택하세요</option>%%CITIES%%<option value="__custom__">▸ 목록에 없어요 (직접 검색)</option></select>
 <div id="custombox" class="hide" style="margin-top:9px"><input name="custom" placeholder="도시, 나라 · 예: 청주 / Lyon, France"></div>
 <button type="submit" class="go">무료로 내 리포트 보기</button>
 <div class="consent">입력 정보는 저장하지 않습니다 · <a href="/privacy" target="_blank" style="color:var(--ink-soft)">개인정보 처리방침</a></div>
