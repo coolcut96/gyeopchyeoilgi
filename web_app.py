@@ -168,9 +168,9 @@ def book_banner(heading="이 풀이의 원리가 궁금하다면"):
         for b in BOOKS)
     return (f'<div class="banner"><div class="bh">{heading}</div>'
             f'<div class="bsub">사주와 별을 나란히 읽는 법</div>{covers}'
-            f'<a class="bookcta" href="/books">책 보러 가기 →</a></div>')
+            f'<a class="bookcta" href="/books" onclick="return openBooks(event)">책 보러 가기 →</a></div>')
 
-def books_page():
+def _books_cards():
     cards = ""
     for b in BOOKS:
         btns = "".join(f'<a class="store" href="{u}" target="_blank">{n} →</a>' for n, u in b["stores"].items())
@@ -178,9 +178,12 @@ def books_page():
                   f'<div class="cover {b["cls"]}">{b["emoji"]}</div>'
                   f'<div><div class="bt">{b["title"]}</div><div class="bs">{b["sub"]}</div></div></div>'
                   f'<div class="stores">{btns}</div></div>')
+    return cards
+
+def books_page():   # JS 꺼진 브라우저용 폴백(별도 페이지)
     body = ('<div class="pagetitle"><h1>책 사러 가기</h1>'
             '<p>편한 서점을 골라 주세요 — 어디서 사셔도 같은 책이에요.</p></div>'
-            + cards +
+            + _books_cards() +
             '<div class="backlink"><a href="/">← 리포트로 돌아가기</a></div>'
             f'<div class="foot">{PUBLISHER}</div>')
     return PAGE.replace("%%BODY%%", body)
@@ -227,7 +230,7 @@ button.go{margin-top:20px;width:100%;padding:15px;border:0;border-radius:13px;
   box-shadow:0 8px 20px -8px rgba(23,58,51,.6)}
 button.go:active{transform:translateY(1px)}
 .consent{font-size:11px;color:var(--muted);margin-top:11px;text-align:center}
-.loadcard{text-align:center;padding:34px 22px 30px}
+.loadcard{text-align:center;padding:48px 22px 44px;margin-top:24px}
 .spin{width:36px;height:36px;border:3px solid #e2ebe5;border-top-color:var(--ink);
   border-radius:50%;margin:0 auto 15px;animation:sp .9s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -266,11 +269,16 @@ button.go:active{transform:translateY(1px)}
 .store:hover{border-color:var(--gold);color:var(--gold)}
 .backlink{text-align:center;margin-top:6px}
 .backlink a{color:var(--ink-soft);font-size:13px}
+.modal{position:fixed;inset:0;z-index:20;overflow-y:auto;background:linear-gradient(170deg,var(--jade-1),var(--jade-2))}
+.modal .minner{max-width:640px;margin:0 auto;padding:0 18px 44px}
+.modalbar{position:sticky;top:0;background:rgba(250,253,251,.94);padding:14px 2px;margin-bottom:2px}
+.modalbar a{color:var(--ink);font-weight:700;font-size:14px;text-decoration:none}
 @media(min-width:560px){.hero h1{font-size:30px}.card{padding:28px 30px}}
 """
 
 # ── 폼 (프론트) ──
 FORM = """
+<div id="top">
 <div class="hero"><h1>사주와 별,<br>두 시계로 나를 겹쳐 봅니다</h1><div class="rule"></div></div>
 <div class="card">
 <form id="f" onsubmit="return submitForm(event)">
@@ -300,24 +308,33 @@ FORM = """
 <div class="consent">입력 정보는 저장하지 않습니다 · <a href="/privacy" target="_blank" style="color:var(--ink-soft)">개인정보 처리방침</a></div>
 </form>
 </div>
+</div>
 <div id="bnr" class="hide">%%LOADBANNER%%</div>
 <div id="out"></div>
 <div class="foot">%%PUBLISHER%%</div>
+<div id="booksModal" class="modal hide"><div class="minner">
+<div class="modalbar"><a href="#" onclick="closeBooks();return false">← 리포트로 돌아가기</a></div>
+<div class="pagetitle"><h1>책 사러 가기</h1><p>편한 서점을 골라 주세요 — 어디서 사셔도 같은 책이에요.</p></div>
+%%BOOKSMODAL%%
+</div></div>
 <script>
 var f=document.getElementById('f');
 function cal(){var m=(f.cal.value=='음력');document.getElementById('leapbox').className='chk'+(m?'':' hide');
   document.querySelectorAll('.radio label').forEach(function(l){l.classList.toggle('on',l.querySelector('input').checked);});}
 function togTime(){var u=document.getElementById('tu').checked;hh.disabled=u;mm.disabled=u;}
 function togCity(){document.getElementById('custombox').className=(city.value=='__custom__')?'':'hide';}
+function openBooks(e){e.preventDefault();document.getElementById('booksModal').classList.remove('hide');window.scrollTo(0,0);return false;}
+function closeBooks(){document.getElementById('booksModal').classList.add('hide');}
 function submitForm(e){
   e.preventDefault();
   var out=document.getElementById('out');
+  document.getElementById('top').style.display='none';   // 입력 폼 감추기(로딩 붕뜸 방지)
   out.innerHTML='<div class="card loadcard"><div class="spin"></div><div class="loadmsg">사주와 별을 나란히 맞춰보는 중…</div></div>'
     +document.getElementById('bnr').innerHTML;
-  out.scrollIntoView({behavior:'smooth'});
+  window.scrollTo({top:0,behavior:'smooth'});
   fetch('/generate',{method:'POST',body:new URLSearchParams(new FormData(f))})
     .then(function(r){return r.text();})
-    .then(function(t){out.innerHTML=t;out.scrollIntoView({behavior:'smooth'});})
+    .then(function(t){out.innerHTML=t;window.scrollTo({top:0,behavior:'smooth'});})
     .catch(function(_){out.innerHTML='<div class="card">잠시 문제가 생겼어요. 다시 시도해 주세요.</div>';});
   return false;
 }
@@ -350,6 +367,7 @@ def form_page():
         for g, names in CITY_GROUPS)
     body = (FORM.replace("%%CITIES%%", opts)
                 .replace("%%LOADBANNER%%", book_banner("기다리는 동안 — 이 풀이의 원리가 궁금하다면"))
+                .replace("%%BOOKSMODAL%%", _books_cards())
                 .replace("%%PUBLISHER%%", PUBLISHER))
     return PAGE.replace("%%BODY%%", body)
 
@@ -374,7 +392,8 @@ def report_fragment(name, text, palja, warns):
     who_line = f'<p class="who">🌗 {html.escape(who)}사주 {pj}</p>'
     body_html = md(text).replace("</h2>", "</h2>\n" + who_line, 1)
     w = "".join(f'<div class="warn">⚠️ {html.escape(x)}</div>' for x in warns)
-    return w + f'<div class="report card">{body_html}</div>' + book_banner()
+    return (w + f'<div class="report card">{body_html}</div>' + book_banner()
+            + '<div class="backlink"><a href="/">← 다른 사람도 보기</a></div>')
 
 class Handler(http.server.BaseHTTPRequestHandler):
     def _send(self, s, code=200):
