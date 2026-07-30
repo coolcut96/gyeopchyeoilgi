@@ -209,7 +209,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun 
 .wrap{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:0 18px 56px}
 .hero{text-align:center;padding:28px 8px 26px}
 .hero h1{font-size:27px;line-height:1.35;margin:0;color:var(--ink);font-weight:800;letter-spacing:-.01em}
-.rule{width:46px;height:2px;background:var(--ink);opacity:.35;margin:20px auto 0;border-radius:2px}
+.rule{width:46px;height:2px;background:var(--ink);opacity:.35;margin:18px auto 0;border-radius:2px}
+.hook{font-size:14.5px;color:var(--ink-soft);margin:13px 0 0;line-height:1.65}
+.discover{text-align:center;color:var(--ink-soft);font-size:14.5px;line-height:1.65;margin:20px 6px 14px}
 .card{background:var(--card);border:1px solid var(--card-line);border-radius:18px;
   padding:24px 22px;box-shadow:0 10px 30px -14px rgba(23,58,51,.28);margin-bottom:20px}
 label{display:block;font-size:12.5px;color:var(--ink-soft);margin:14px 0 5px;font-weight:600}
@@ -284,7 +286,7 @@ button.go:active{transform:translateY(1px)}
 # ── 폼 (프론트) ──
 FORM = """
 <div id="top">
-<div class="hero"><h1>사주와 별,<br>두 시계로 나를 겹쳐 봅니다</h1><div class="rule"></div></div>
+<div class="hero"><h1>사주와 별,<br>두 시계로 나를 겹쳐 봅니다</h1><p class="hook">내 여덟 글자가, 하늘의 어느 별과 겹치는지 —</p><div class="rule"></div></div>
 <div class="card">
 <form id="f" onsubmit="return submitForm(event)">
 <label>이름 (선택)</label><input name="name" placeholder="예: 홍길동">
@@ -412,7 +414,9 @@ def report_fragment(name, text, palja, warns):
     who_line = f'<p class="who">🌗 {html.escape(who)}사주 {pj}</p>'
     body_html = md(text).replace("</h2>", "</h2>\n" + who_line, 1)
     w = "".join(f'<div class="warn">⚠️ {html.escape(x)}</div>' for x in warns)
-    return (w + f'<div class="report card">{body_html}</div>' + book_banner()
+    return (w + f'<div class="report card">{body_html}</div>'
+            + '<p class="discover">여기까지가 맛보기예요. 두 시계가 왜 같은 자리를 가리키는지, 그 겹침을 끝까지 따라가 보고 싶다면 —</p>'
+            + book_banner()
             + '<button class="sharebtn" onclick="shareSite()">🔗 친구에게 소개하기</button>'
             + '<div class="backlink"><a href="/">🔄 다른 사주 보기</a></div>')
 
