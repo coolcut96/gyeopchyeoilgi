@@ -29,9 +29,9 @@ def leak_check(text):
 def material_brief(a, tier='유료', time_unknown=False):
     dom, sk, dsc, find, cats = a['dom'], a['sinkang'], a['dsc'], a['find'], a['cats']; dom2 = a.get('dom2')
     L = []
-    L.append(f"- 자기 힘: {'단단하고 잘 안 흔들림' if sk else '주변에 유연하게 맞춤'}")
     L.append(f"- 주 강점: {G.DOM_STRENGTH[dom]}" + (f" + {G.DOM_STRENGTH[dom2]}(나란히)" if dom2 else ""))
     L.append(f"- 삶의 기울기: {G.DOM_TXT[dom]}")
+    L.append(f"- 자기 힘(첫 문장 말고 중간에 녹일 것): {'단단하고 잘 안 흔들림' if sk else '주변에 유연하게 맞춤'}")
     if cats['比劫'] >= 2: L.append("- 겨룸·경쟁이 자주 따라붙음")
     for k, t in find:
         if t == '밖으로 나가는 힘':
@@ -74,6 +74,7 @@ def build_prompt(brief, tier):
 2-1. 점성술 쪽을 가리킬 땐 '별로 보면'이 아니라 '점성술로 보면'이라고 쓴다. 두 체계는 '사주'와 '점성술'로 부른다.
 3. 톤: 상담가가 눈앞에서 차분히 설명하듯. 구체적이고 바로 알아듣게. 시적·모호한 표현(결·자리·되짚는 남발) 피한다.
 3-1. 각 영역(인정과 명예·감정과 일상·속마음 등)은 서로 다른 표현으로, 같은 단어를 반복하지 말고 편안하게 풀어 쓴다.
+3-2. 첫 문장을 사람마다 다르게 연다. '당신의 기본 성격은', '단단하고 흔들리지 않는', '자기 확신이 뚜렷하고' 같은 틀에 박힌 시작을 반복하지 말 것. 그 사람의 가장 두드러진 강점(주 강점·삶의 기울기)에서 신선한 표현으로 시작하고, '자기 힘(단단함/유연함)'은 첫머리가 아니라 본문 중간에 자연스럽게 녹인다.
 4. 명확하고 자신 있게 쓴다. 과한 유보('확정은 아니고 참고로요' 같은 표현)는 넣지 않는다. 성격·강점은 단정적으로 짚되, 미래 사건을 예언하지는 않는다.
 4-1. 이 풀이는 '타고난 성격·경향성'을 보는 것이지 특정 시기·운세가 아니다. '지금은 / 올해는 / 요즘 / 이 시기엔 / 앞으로 한동안 / ~하는 시기예요' 같은 시간 표현을 절대 쓰지 말고, 늘 그러한 경향으로 서술한다. 조언도 '지금 이렇게 하라'가 아니라 '이런 사람이니 이렇게 살면 좋다'로.
 5. 2인칭("당신은")으로 쓴다.
@@ -96,7 +97,7 @@ def ai_render(a, tier='유료', api_key=None, model=None, time_unknown=False):
     prompt = build_prompt(material_brief(a, tier, time_unknown), tier)
     try:
         client = anthropic.Anthropic(api_key=api_key)
-        msg = client.messages.create(model=model, max_tokens=2500, temperature=0.4,
+        msg = client.messages.create(model=model, max_tokens=2500, temperature=0.7,
                                      messages=[{"role": "user", "content": prompt}])
         text = msg.content[0].text.strip()
     except Exception as e:

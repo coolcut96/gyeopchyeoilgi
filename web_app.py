@@ -163,7 +163,7 @@ def book_banner(heading="이 풀이의 원리가 궁금하다면"):
         f'<div><div class="bt">{b["title"]}</div><div class="bs">{b["sub"]}</div>'
         f'<div class="buy">구매하기 →</div></div></a>' for b in BOOKS)
     return (f'<div class="banner"><div class="bh">{heading}</div>'
-            f'<div class="bsub">오승환의 사주×점성술 3부작</div>{cards}</div>')
+            f'<div class="bsub">사주와 별을 나란히 읽는 법</div>{cards}</div>')
 
 # ── CSS ──
 CSS = """
