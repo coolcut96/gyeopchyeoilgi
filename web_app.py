@@ -34,10 +34,14 @@ def rate_ok(ip):
         hist.append(now); _RATE[ip] = hist; return True
 
 # ── 책 배너 (URL은 판매 링크 나오면 교체) ──
+# 각 책의 서점별 링크. ▼▼ 나중에 실제 판매 주소로 교체 ▼▼ (없는 서점은 그 줄을 지우면 버튼도 사라짐)
 BOOKS = [
-    {"title": "별을 보다가 사주를 펼쳤다", "sub": "사주인을 위한 점성술 입문",   "url": "https://판매사이트-링크/book1", "cls": "c1", "emoji": "📘"},
-    {"title": "여덟 글자 뒤의 별들",       "sub": "점성술 렌즈로 본 사주의 구조", "url": "https://판매사이트-링크/book2", "cls": "c2", "emoji": "📗"},
-    {"title": "일단 해보자 점성술",        "sub": "직접 따라 하며 익히는 실전 점성술", "url": "https://판매사이트-링크/book3", "cls": "c3", "emoji": "📙"},
+    {"title": "별을 보다가 사주를 펼쳤다", "sub": "사주인을 위한 점성술 입문", "cls": "c1", "emoji": "📘",
+     "stores": {"리디북스": "https://리디북스-링크-1권", "교보문고": "https://교보문고-링크-1권", "유페이퍼": "https://유페이퍼-링크-1권"}},
+    {"title": "여덟 글자 뒤의 별들", "sub": "점성술 렌즈로 본 사주의 구조", "cls": "c2", "emoji": "📗",
+     "stores": {"리디북스": "https://리디북스-링크-2권", "교보문고": "https://교보문고-링크-2권", "유페이퍼": "https://유페이퍼-링크-2권"}},
+    {"title": "일단 해보자 점성술", "sub": "직접 따라 하며 익히는 실전 점성술", "cls": "c3", "emoji": "📙",
+     "stores": {"리디북스": "https://리디북스-링크-3권", "교보문고": "https://교보문고-링크-3권", "유페이퍼": "https://유페이퍼-링크-3권"}},
 ]
 PUBLISHER = "별읽기 · Star Reading"
 
@@ -158,12 +162,28 @@ def md(text):
     return "\n".join(out)
 
 def book_banner(heading="이 풀이의 원리가 궁금하다면"):
-    cards = "".join(
-        f'<a class="book" href="{b["url"]}" target="_blank"><div class="cover {b["cls"]}">{b["emoji"]}</div>'
-        f'<div><div class="bt">{b["title"]}</div><div class="bs">{b["sub"]}</div>'
-        f'<div class="buy">구매하기 →</div></div></a>' for b in BOOKS)
+    covers = "".join(
+        f'<div class="book"><div class="cover {b["cls"]}">{b["emoji"]}</div>'
+        f'<div><div class="bt">{b["title"]}</div><div class="bs">{b["sub"]}</div></div></div>'
+        for b in BOOKS)
     return (f'<div class="banner"><div class="bh">{heading}</div>'
-            f'<div class="bsub">사주와 별을 나란히 읽는 법</div>{cards}</div>')
+            f'<div class="bsub">사주와 별을 나란히 읽는 법</div>{covers}'
+            f'<a class="bookcta" href="/books">책 보러 가기 →</a></div>')
+
+def books_page():
+    cards = ""
+    for b in BOOKS:
+        btns = "".join(f'<a class="store" href="{u}" target="_blank">{n} →</a>' for n, u in b["stores"].items())
+        cards += (f'<div class="card bookbuy"><div class="bmeta">'
+                  f'<div class="cover {b["cls"]}">{b["emoji"]}</div>'
+                  f'<div><div class="bt">{b["title"]}</div><div class="bs">{b["sub"]}</div></div></div>'
+                  f'<div class="stores">{btns}</div></div>')
+    body = ('<div class="pagetitle"><h1>책 사러 가기</h1>'
+            '<p>편한 서점을 골라 주세요 — 어디서 사셔도 같은 책이에요.</p></div>'
+            + cards +
+            '<div class="backlink"><a href="/">← 리포트로 돌아가기</a></div>'
+            f'<div class="foot">{PUBLISHER}</div>')
+    return PAGE.replace("%%BODY%%", body)
 
 # ── CSS ──
 CSS = """
@@ -235,6 +255,17 @@ button.go:active{transform:translateY(1px)}
 .bs{font-size:12px;color:var(--muted);margin-top:1px}
 .buy{font-size:12.5px;color:var(--gold);font-weight:700;margin-top:4px}
 .foot{text-align:center;font-size:12px;color:var(--muted);margin-top:8px}
+.bookcta{display:block;text-align:center;text-decoration:none;margin-top:12px;padding:14px;border-radius:11px;background:var(--ink);color:#f4f8f5;font-weight:800;font-size:15px}
+.pagetitle{text-align:center;padding:24px 8px 6px}
+.pagetitle h1{font-size:22px;color:var(--ink);margin:0;font-weight:800}
+.pagetitle p{font-size:13px;color:var(--muted);margin:8px 0 0}
+.bookbuy{padding:18px}
+.bmeta{display:flex;gap:13px;align-items:center;margin-bottom:14px}
+.stores{display:flex;flex-wrap:wrap;gap:8px}
+.store{flex:1;min-width:96px;text-align:center;text-decoration:none;padding:11px 10px;border-radius:10px;border:1.5px solid #d8d4cc;color:var(--ink);font-weight:700;font-size:13.5px;background:#fff}
+.store:hover{border-color:var(--gold);color:var(--gold)}
+.backlink{text-align:center;margin-top:6px}
+.backlink a{color:var(--ink-soft);font-size:13px}
 @media(min-width:560px){.hero h1{font-size:30px}.card{padding:28px 30px}}
 """
 
@@ -356,6 +387,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith("/privacy"):
             self._send(privacy_page()); return
+        if self.path.startswith("/books"):
+            self._send(books_page()); return
         if self.path == "/favicon.ico":
             self.send_response(204); self.end_headers(); return
         self._send(form_page())
