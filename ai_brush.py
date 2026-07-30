@@ -96,7 +96,7 @@ def ai_render(a, tier='유료', api_key=None, model=None, time_unknown=False):
     prompt = build_prompt(material_brief(a, tier, time_unknown), tier)
     try:
         client = anthropic.Anthropic(api_key=api_key)
-        msg = client.messages.create(model=model, max_tokens=1200, temperature=0.4,
+        msg = client.messages.create(model=model, max_tokens=2500, temperature=0.4,
                                      messages=[{"role": "user", "content": prompt}])
         text = msg.content[0].text.strip()
     except Exception as e:

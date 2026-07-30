@@ -179,8 +179,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun 
   background:linear-gradient(170deg,var(--jade-1) 0%,var(--jade-2) 100%);
   background-attachment:fixed;min-height:100vh}
 #sky{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-#sky svg{position:absolute;top:50%;left:50%;transform:translate(-50%,-46%);
-  width:min(150vw,900px);height:min(150vw,900px);opacity:.14}
+#sky svg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:min(155vw,960px);height:auto;opacity:.13}
 .wrap{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:0 18px 56px}
 .hero{text-align:center;padding:28px 8px 26px}
 .hero h1{font-size:27px;line-height:1.35;margin:0;color:var(--ink);font-weight:800;letter-spacing:-.01em}
@@ -299,25 +299,17 @@ PAGE = ("<!DOCTYPE html><html lang=ko><head><meta charset=utf-8>"
         "<body><div id=sky></div><div class=wrap>%%BODY%%</div>"
         "<script>"+ """
 (function(){var NS="http://www.w3.org/2000/svg",J="#5f9280";
-var signs="♈♉♊♋♌♍♎♏♐♑♒♓".split("");
+var signs="♈♉♊♋♌♍♎♏♐♑♒♓".split("").map(function(c){return c+"︎";}); // ︎=text presentation(단색 강제)
 var jiji="子丑寅卯辰巳午未申酉戌亥".split("");
-var svg=document.createElementNS(NS,"svg");svg.setAttribute("viewBox","0 0 400 400");var cx=200,cy=200;
-function circle(r,dash){var c=document.createElementNS(NS,"circle");c.setAttribute("cx",cx);c.setAttribute("cy",cy);
- c.setAttribute("r",r);c.setAttribute("fill","none");c.setAttribute("stroke",J);c.setAttribute("stroke-width","1");
- if(dash)c.setAttribute("stroke-dasharray",dash);svg.appendChild(c);}
-function spokes(r1,r2){for(var i=0;i<12;i++){var a=(i*30-90)*Math.PI/180;var l=document.createElementNS(NS,"line");
- l.setAttribute("x1",cx+r1*Math.cos(a));l.setAttribute("y1",cy+r1*Math.sin(a));
- l.setAttribute("x2",cx+r2*Math.cos(a));l.setAttribute("y2",cy+r2*Math.sin(a));
- l.setAttribute("stroke",J);l.setAttribute("stroke-width",".6");svg.appendChild(l);}}
-function glyphs(arr,r,size){for(var i=0;i<12;i++){var a=(i*30-90+15)*Math.PI/180;var t=document.createElementNS(NS,"text");
- t.setAttribute("x",cx+r*Math.cos(a));t.setAttribute("y",cy+r*Math.sin(a));t.setAttribute("fill",J);
- t.setAttribute("font-size",size);t.setAttribute("text-anchor","middle");t.setAttribute("dominant-baseline","central");
- t.textContent=arr[i];svg.appendChild(t);}}
-circle(190);circle(158,"2 4");circle(126);circle(94,"2 4");circle(30);spokes(94,190);
-glyphs(signs,174,15);glyphs(jiji,110,15);
-var m=document.createElementNS(NS,"text");m.setAttribute("x",cx);m.setAttribute("y",cy);m.setAttribute("fill",J);
-m.setAttribute("font-size","26");m.setAttribute("text-anchor","middle");m.setAttribute("dominant-baseline","central");
-m.textContent="☯";svg.appendChild(m);
+var svg=document.createElementNS(NS,"svg");svg.setAttribute("viewBox","0 0 440 300");
+function E(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}
+function ring(cx,cy,r,dash){var o={cx:cx,cy:cy,r:r,fill:"none",stroke:J,"stroke-width":1};if(dash)o["stroke-dasharray"]=dash;svg.appendChild(E("circle",o));}
+function spokes(cx,cy,r1,r2){for(var i=0;i<12;i++){var a=(i*30-90)*Math.PI/180;svg.appendChild(E("line",{x1:cx+r1*Math.cos(a),y1:cy+r1*Math.sin(a),x2:cx+r2*Math.cos(a),y2:cy+r2*Math.sin(a),stroke:J,"stroke-width":.5}));}}
+function glyphs(cx,cy,r,arr){for(var i=0;i<12;i++){var a=(i*30-90+15)*Math.PI/180;var t=E("text",{x:cx+r*Math.cos(a),y:cy+r*Math.sin(a),fill:J,"font-size":13,"text-anchor":"middle","dominant-baseline":"central"});t.textContent=arr[i];svg.appendChild(t);}}
+function star(cx,cy){for(var i=0;i<8;i++){var a=i*Math.PI/4,L=(i%2?5:11);svg.appendChild(E("line",{x1:cx,y1:cy,x2:cx+L*Math.cos(a),y2:cy+L*Math.sin(a),stroke:J,"stroke-width":.7}));}}
+function wheel(cx,cy,arr){ring(cx,cy,120);ring(cx,cy,98,"2 4");ring(cx,cy,66);spokes(cx,cy,66,120);glyphs(cx,cy,109,arr);star(cx,cy);}
+wheel(150,150,signs);   // 왼쪽 = 12 별자리
+wheel(290,150,jiji);    // 오른쪽 = 12 지지 (옆으로 겹침)
 document.getElementById("sky").appendChild(svg);})();
 """ + "</script></body></html>")
 
