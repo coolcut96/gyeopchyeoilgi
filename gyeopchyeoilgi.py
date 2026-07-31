@@ -41,6 +41,29 @@ def score(dig,se,h,comb=None):
     return s+{'in-sect':1,'out-of-sect':-1,'중립':0}[se]+(1 if ang(h)=='앵글' else 0)-(2 if comb=='컴버스트' else 0)
 def lab(s): return '든든' if s>=3 else('무던~약간 든든' if s>=1 else('무던' if s==0 else('눌림' if s>-3 else'강하게 눌림')))
 
+# ── 지지 합충 (책 1권: 합충↔애스펙트. [확립]된 충·삼합·육합만 사용) ──
+import itertools as _it
+YUKHAP={frozenset(('자','축')),frozenset(('인','해')),frozenset(('묘','술')),frozenset(('진','유')),frozenset(('사','신')),frozenset(('오','미'))}
+CHUNG={frozenset(('자','오')),frozenset(('축','미')),frozenset(('인','신')),frozenset(('묘','유')),frozenset(('진','술')),frozenset(('사','해'))}
+SAMHAP=[{'신','자','진'},{'해','묘','미'},{'인','오','술'},{'사','유','축'}]
+SAMHYEONG_SURFACE={'인','사','신'}   # 寅巳申 = T스퀘어 앵귤러(1·4·7H) — 표면에서 터짐
+SAMHYEONG_INNER={'축','술','미'}     # 丑戌未 = T스퀘어 카이던트(12·9·6H) — 안에서 응어림
+def jiji_relations(palja):
+    br=[b for _,b in palja]; brs=set(br)
+    chung=set(); yukhap=set()
+    for i,j in _it.combinations(range(4),2):
+        pr=frozenset((br[i],br[j]))
+        if len(pr)==2:
+            if pr in CHUNG: chung.add(pr)
+            if pr in YUKHAP: yukhap.add(pr)
+    full=half=False
+    for s in SAMHAP:
+        n=len(brs & s)
+        if n==3: full=True
+        elif n==2: half=True
+    samhyeong=('surface' if SAMHYEONG_SURFACE<=brs else ('inner' if SAMHYEONG_INNER<=brs else None))
+    return {'chung':len(chung), 'yukhap':len(yukhap), 'samhap_full':full, 'samhap_half':half, 'samhyeong':samhyeong}
+
 # ══════════ 파이프라인 ══════════
 def analyze(case):
     palja=case['palja']; day=palja[2][0]; asc=case['asc']; is_day=case['day']; natal=case['natal']
@@ -67,7 +90,8 @@ def analyze(case):
     outer=(dsc['사회적 위상'][0]+dsc['개인 권위'][0])/2
     if dom in('財','官','食傷') and outer>0: find.append(('포갬','밖으로 나가는 힘'))
     if dsc['사회적 위상'][2]=='화성' and (cats['比劫']>=2 or dom=='財'): find.append(('포갬','밖으로 나가는 방식'))
-    return dict(cats=cats,dom=dom,dom2=dom2,sinkang=sinkang,dsc=dsc,find=find)
+    rel=jiji_relations(palja)
+    return dict(cats=cats,dom=dom,dom2=dom2,sinkang=sinkang,dsc=dsc,find=find,rel=rel)
 
 # ══════════ 템플릿 렌더러 ══════════
 DOM_TXT={'財':'삶이 성과와 실리 쪽으로 기울어, 손에 쥐고 이뤄내는 데 관심이 많은 편이에요.','官':'책임과 의무를 앞자리에 두고, 마땅히 해야 할 것을 먼저 짊어지는 편이에요.','印':'배우고 받쳐 주는 힘 안에서 차분히 자라는 결이 강해요.','食傷':'표현하고 뻗어 나가며 자기를 드러내는 편이에요.','比劫':'스스로 서고 겨루며 나아가는 힘이 강해요.'}
@@ -79,6 +103,14 @@ RELATION={
  '印':'배우고 받쳐 주는 관계에서 편안한 사람. 스승·윗사람과 잘 통하고, 남을 품어 키우거나 조언해 주는 자리에 어울린다',
  '食傷':'말과 표현으로 사람을 끄는 사람. 후배·아랫사람에게 잘 베풀고, 자기를 드러내는 무대나 가르치는 자리에서 빛난다',
  '比劫':'친구·동료와 어깨를 나란히 하는 관계가 편한 사람. 경쟁 속에서 자기를 세우고, 대등하게 힘을 겨루거나 함께 밀고 나가는 자리가 맞는다',
+}
+# 관계 축 — 템플릿(폴백)용 존댓말 문단. AI 붓이 죽어도 리포트가 밋밋하지 않게.
+RELATION_TPL={
+ '官':'사람들 사이에서 보면, 당신은 윗사람·규칙과의 관계에서 신뢰를 얻는 편입니다. 맡은 책임을 지고 질서를 세우는 자리에서 인정받고, 사람들을 이끄는 역할이 잘 맞습니다.',
+ '財':'사람들 사이에서 보면, 당신은 상대를 실질적으로 챙기고 주고받는 데 능한 편입니다. 아랫사람이나 현장을 잘 건사하고, 실리로 관계를 단단하게 만듭니다.',
+ '印':'사람들 사이에서 보면, 당신은 배우고 받쳐 주는 관계에서 편안한 편입니다. 윗사람·스승과 잘 통하고, 남을 품어 키우거나 조언해 주는 자리에 어울립니다.',
+ '食傷':'사람들 사이에서 보면, 당신은 말과 표현으로 사람을 끄는 편입니다. 후배나 아랫사람에게 잘 베풀고, 자기를 드러내는 무대나 가르치는 자리에서 빛납니다.',
+ '比劫':'사람들 사이에서 보면, 당신은 친구·동료와 어깨를 나란히 하는 관계가 편한 편입니다. 경쟁 속에서 자기를 세우고, 대등하게 힘을 겨루거나 함께 밀고 나가는 자리가 잘 맞습니다.',
 }
 FORM_TXT={'든든':'든든하게 자리 잡았고','무던~약간 든든':'무던하게 서 있고','무던':'무던하고','눌림':'다소 눌려 있고','강하게 눌림':'꽤 눌려 있고'}
 DOM_NAME={'개인 권위':'인정과 명예','일상·감정':'감정과 일상','속마음·기질':'속마음과 타고난 성향'}
@@ -144,6 +176,20 @@ def render(a, tier='유료', time_unknown=False):
                 seg.append(f"**{nm}**{j} {stand}. {STYLE[tl]} 쪽이에요.")
             i+=1
         P.append(" ".join(seg))
+    P.append(RELATION_TPL[dom])   # 관계 축 — 사람들 사이에서의 나
+    rel=a.get('rel',{})           # 지지 합충 → 관법 숨기고 '열매'만
+    rp=[]
+    if rel.get('chung'):
+        rp.append("안쪽에는 정면으로 맞서는 두 결이 함께 있어요. 긴장을 피하기보다 그 사이에서 균형을 잡을 때 오히려 힘이 나는 사람이라, 부딪힘을 동력으로 쓸 줄 압니다.")
+    if rel.get('samhyeong')=='surface':
+        rp.append("속에 팽팽한 긴장이 늘 감돌지만, 그걸 억누르기보다 밖으로 크게 터뜨리며 밀어붙이는 사람이에요. 부딪힘을 두려워하지 않고 오히려 그 힘으로 판을 키웁니다.")
+    elif rel.get('samhyeong')=='inner':
+        rp.append("속에는 팽팽한 긴장이 있어도 겉으로 잘 드러내지 않는 사람이에요. 밖으로 터뜨리기보다 안으로 눌러 삭이며 오래 버티는, 묵직한 뚝심이 있습니다.")
+    if rel.get('samhap_full'):
+        rp.append("여러 기운이 한 방향으로 강하게 모여 있어, 한번 마음먹으면 그쪽으로 밀어붙이는 집중력이 뚜렷합니다.")
+    if rel.get('yukhap'):
+        rp.append("서로 다른 자리가 조용히 짝을 이루고 있어, 안정적으로 묶이고 조화를 이루는 결이 있습니다.")
+    if rp: P.append(" ".join(rp))
     if (not time_unknown) and any(t=='자기 힘' for _,t in find):
         if sk:
             P.append("한 결을 더 짚자면, 당신은 **겉은 강하게 밀고 나가도 속은 신중하게 되짚는** 사람입니다. 사주는 심지의 단단함을, 점성술은 그 안쪽의 조심스러움을 가리킵니다. 둘이 어긋난 게 아니라, 밀어붙이는 힘과 신중함을 한 몸에 지녔다는 뜻입니다.")
