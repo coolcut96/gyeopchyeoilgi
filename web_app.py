@@ -293,8 +293,8 @@ FORM = """
 <div id="top">
 <div class="hero"><h1>사주와 별,<br>두 시계로 나를 겹쳐 봅니다</h1><p class="hook">내 여덟 글자가, 하늘의 어느 별과 겹치는지 —</p><div class="rule"></div></div>
 <div class="card">
-<form id="f" onsubmit="return submitForm(event)">
-<label>이름 (선택)</label><input name="name" placeholder="예: 홍길동">
+<form id="f" autocomplete="off" onsubmit="return submitForm(event)">
+<label>이름 (선택)</label><input name="name" autocomplete="off" placeholder="예: 홍길동">
 <label>달력</label>
 <div class="radio">
   <label class="on"><input type="radio" name="cal" value="양력" checked onchange="cal()"> 양력</label>
@@ -303,19 +303,19 @@ FORM = """
 <label class="chk hide" id="leapbox"><input type="checkbox" name="leap"> 그 달이 윤달이었어요 <span class="muted">(해당될 때만)</span></label>
 <label>생년월일</label>
 <div class="row">
-  <div><input name="y" type="text" inputmode="numeric" maxlength="4" placeholder="1980년" required></div>
-  <div><input name="mo" type="text" inputmode="numeric" maxlength="2" placeholder="5월" required></div>
-  <div><input name="d" type="text" inputmode="numeric" maxlength="2" placeholder="15일" required></div>
+  <div><input name="y" type="text" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="1980년" required></div>
+  <div><input name="mo" type="text" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="5월" required></div>
+  <div><input name="d" type="text" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="15일" required></div>
 </div>
 <label>태어난 시각</label>
 <div class="row">
-  <div><input name="hh" id="hh" type="text" inputmode="numeric" maxlength="2" placeholder="시 (0~23)"></div>
-  <div><input name="mm" id="mm" type="text" inputmode="numeric" maxlength="2" placeholder="분"></div>
+  <div><input name="hh" id="hh" type="text" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="시 (0~23)"></div>
+  <div><input name="mm" id="mm" type="text" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="분"></div>
 </div>
 <label class="chk"><input type="checkbox" name="tu" id="tu" onchange="togTime()"> 태어난 시각을 몰라요 <span class="muted">(정오 기준)</span></label>
 <label>출생지</label>
 <select name="city" id="city" required onchange="togCity()"><option value="" disabled selected>출생지를 선택하세요</option>%%CITIES%%<option value="__custom__">▸ 목록에 없어요 (직접 검색)</option></select>
-<div id="custombox" class="hide" style="margin-top:9px"><input name="custom" placeholder="도시, 나라 · 예: 청주 / Lyon, France"></div>
+<div id="custombox" class="hide" style="margin-top:9px"><input name="custom" autocomplete="off" placeholder="도시, 나라 · 예: 청주 / Lyon, France"></div>
 <button type="submit" class="go">무료로 내 리포트 보기</button>
 <div class="consent">입력 정보는 저장하지 않습니다 · <a href="/privacy" target="_blank" style="color:var(--ink-soft)">개인정보 처리방침</a></div>
 </form>
