@@ -39,11 +39,11 @@ def rate_ok(ip):
 # 각 책의 서점별 링크. ▼▼ 나중에 실제 판매 주소로 교체 ▼▼ (없는 서점은 그 줄을 지우면 버튼도 사라짐)
 BOOKS = [
     {"title": "별을 보다가 사주를 펼쳤다", "brtitle": "별을 보다가<br>사주를 펼쳤다", "sub": "사주인을 위한 점성술 입문", "cls": "c1", "emoji": "📘",
-     "stores": {"리디북스": "https://리디북스-링크-1권", "교보문고": "https://교보문고-링크-1권", "예스24": "https://예스24-링크-1권"}},
+     "stores": {"리디북스": "https://리디북스-링크-1권", "교보문고": "https://교보문고-링크-1권", "예스24": "https://예스24-링크-1권", "알라딘": "https://알라딘-링크-1권"}},
     {"title": "여덟 글자 뒤의 별들", "brtitle": "여덟 글자<br>뒤의 별들", "sub": "점성술 렌즈로 본 사주의 구조", "cls": "c2", "emoji": "📗",
-     "stores": {"리디북스": "https://리디북스-링크-2권", "교보문고": "https://교보문고-링크-2권", "예스24": "https://예스24-링크-2권"}},
+     "stores": {"리디북스": "https://리디북스-링크-2권", "교보문고": "https://교보문고-링크-2권", "예스24": "https://예스24-링크-2권", "알라딘": "https://알라딘-링크-2권"}},
     {"title": "일단 해보자 점성술", "brtitle": "일단 해보자<br>점성술", "sub": "직접 따라 하며 익히는 실전 점성술", "cls": "c3", "emoji": "📙",
-     "stores": {"리디북스": "https://리디북스-링크-3권", "교보문고": "https://교보문고-링크-3권", "예스24": "https://예스24-링크-3권"}},
+     "stores": {"리디북스": "https://리디북스-링크-3권", "교보문고": "https://교보문고-링크-3권", "예스24": "https://예스24-링크-3권", "알라딘": "https://알라딘-링크-3권"}},
 ]
 PUBLISHER = "별읽기 · Star Reading"
 
@@ -273,7 +273,7 @@ button.go:active{transform:translateY(1px)}
 .pagetitle p{font-size:13px;color:var(--muted);margin:8px 0 0}
 .bookbuy{padding:18px}
 .bmeta{display:flex;gap:13px;align-items:center;margin-bottom:14px}
-.stores{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stores{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 .store{text-align:center;text-decoration:none;padding:11px 6px;border-radius:10px;border:1.5px solid #d8d4cc;color:var(--ink);font-weight:700;font-size:13px;background:#fff}
 .store:hover{border-color:var(--gold);color:var(--gold)}
 .backlink{text-align:center;margin-top:14px}
