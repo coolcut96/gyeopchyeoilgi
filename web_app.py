@@ -221,6 +221,8 @@ input,select{width:100%;padding:11px 12px;border:1px solid #d3ded6;border-radius
   font-size:15px;color:var(--text);background:#fff;font-family:inherit}
 input:focus,select:focus{outline:none;border-color:var(--ink-soft);box-shadow:0 0 0 3px rgba(95,146,128,.18)}
 input:disabled{background:#eef2ee;color:#a9b6af}
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .radio{display:flex;gap:10px;margin-top:2px}
 .radio label{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;margin:0;
   padding:10px;border:1px solid #d3ded6;border-radius:11px;cursor:pointer;font-weight:500;color:var(--text)}
@@ -303,14 +305,14 @@ FORM = """
 <label class="chk hide" id="leapbox"><input type="checkbox" name="leap"> 그 달이 윤달이었어요 <span class="muted">(해당될 때만)</span></label>
 <label>생년월일</label>
 <div class="row">
-  <div><input name="y" type="text" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="1980년" required></div>
-  <div><input name="mo" type="text" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="5월" required></div>
-  <div><input name="d" type="text" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="15일" required></div>
+  <div><input name="y" type="number" inputmode="numeric" autocomplete="off" placeholder="1980년" required></div>
+  <div><input name="mo" type="number" inputmode="numeric" autocomplete="off" placeholder="5월" required></div>
+  <div><input name="d" type="number" inputmode="numeric" autocomplete="off" placeholder="15일" required></div>
 </div>
 <label>태어난 시각</label>
 <div class="row">
-  <div><input name="hh" id="hh" type="text" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="시 (0~23)"></div>
-  <div><input name="mm" id="mm" type="text" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="분"></div>
+  <div><input name="hh" id="hh" type="number" inputmode="numeric" autocomplete="off" placeholder="시 (0~23)"></div>
+  <div><input name="mm" id="mm" type="number" inputmode="numeric" autocomplete="off" placeholder="분"></div>
 </div>
 <label class="chk"><input type="checkbox" name="tu" id="tu" onchange="togTime()"> 태어난 시각을 몰라요 <span class="muted">(정오 기준)</span></label>
 <label>출생지</label>
