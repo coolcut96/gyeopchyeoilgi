@@ -422,7 +422,7 @@ def report_fragment(name, text, palja, warns):
     body_html = md(text).replace("</h2>", "</h2>\n" + who_line, 1)
     w = "".join(f'<div class="warn">⚠️ {html.escape(x)}</div>' for x in warns)
     return (w + f'<div class="report card">{body_html}</div>'
-            + '<p class="discover">여기까지가 맛보기예요. 두 시계가 왜 같은 자리를 가리키는지, 그 겹침을 끝까지 따라가 보고 싶다면 —</p>'
+            + '<p class="discover">여기까지가 맛보기예요. 두 시계가 왜 같은 자리를 가리키는지, 끝까지 따라가 보고 싶다면 —</p>'
             + book_banner()
             + '<button class="sharebtn" onclick="shareSite()">🔗 친구에게 소개하기</button>'
             + '<div class="backlink"><a href="/">🔄 다른 생일로 다시 보기</a></div>')
