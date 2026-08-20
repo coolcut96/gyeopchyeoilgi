@@ -350,7 +350,7 @@ function submitForm(e){
   e.preventDefault();
   var out=document.getElementById('out');
   document.getElementById('top').style.display='none';   // 입력 폼 감추기(로딩 붕뜸 방지)
-  out.innerHTML='<div class="card loadcard"><div class="spin"></div><div class="loadmsg">사주와 별자리를 맞춰보는 중…</div></div>'
+  out.innerHTML='<div class="card loadcard"><div class="spin"></div><div class="loadmsg">당신의 사주와 별자리를 살펴보는 중…</div></div>'
     +document.getElementById('bnr').innerHTML;
   window.scrollTo({top:0,behavior:'smooth'});
   fetch('/generate',{method:'POST',body:new URLSearchParams(new FormData(f))})
