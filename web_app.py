@@ -293,7 +293,7 @@ button.go:active{transform:translateY(1px)}
 # ── 폼 (프론트) ──
 FORM = """
 <div id="top">
-<div class="hero"><h1>사주와 별,<br>두 시계로 나를 겹쳐 봅니다</h1><p class="hook">내 여덟 글자가, 하늘의 어느 별과 겹치는지 —</p><div class="rule"></div></div>
+<div class="hero"><h1>사주와 별자리로<br>나를 읽습니다</h1><p class="hook">동양의 사주와 서양의 별자리가, 같은 나를 말할 때 —</p></div>
 <div class="card">
 <form id="f" autocomplete="off" onsubmit="return submitForm(event)">
 <label>이름 (선택)</label><input name="name" autocomplete="off" placeholder="예: 홍길동">
