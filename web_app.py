@@ -23,17 +23,31 @@ CONTACT = "coolcut96@gmail.com"            # 처리방침 문의처 (교체 가�
 SITE_URL = "https://port-0-gyeopchyeoilgi-ms6u5ojjac33edd8.sel3.cloudtype.app"  # 배포 주소(og:image 절대경로용)
 OG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "og.png")     # 카톡 미리보기 썸네일
 
-# ── 남용 방지: IP별 요청 제한 (in-memory, 요금 폭탄·봇 스팸 차단) ──
+# ── 남용 방지: IP별 요청 제한 + 전체 비용 안전판 (in-memory) ──
 _RATE = {}                       # ip -> [timestamps]
+_GLOBAL_AI = []                  # 전체 AI 생성 타임스탬프(비용 안전판)
 _RATE_LOCK = threading.Lock()
 LIMIT_HOUR, LIMIT_DAY = 8, 25    # IP당 시간/일 최대 리포트 수
-def rate_ok(ip):
+MIN_INTERVAL = 12                # 같은 IP 연사 차단: 요청 사이 최소 간격(초) — 매크로 연발 방지
+AI_DAY_CAP = int(os.environ.get("AI_DAY_CAP", "600"))  # 하루 AI 생성 전체 상한(IP 바꿔도 적용). 초과 시 무료 템플릿으로 제공
+def gate(ip):
+    """('block', 메시지) | ('template', None) | ('ok', None)"""
     now = time.time()
     with _RATE_LOCK:
         hist = [t for t in _RATE.get(ip, []) if now - t < 86400]
+        if hist and now - hist[-1] < MIN_INTERVAL:           # 연사 차단
+            _RATE[ip] = hist
+            return ('block', '조금 천천히요 🙂 잠깐 뒤에 다시 눌러 주세요.')
         if sum(1 for t in hist if now - t < 3600) >= LIMIT_HOUR or len(hist) >= LIMIT_DAY:
-            _RATE[ip] = hist; return False
-        hist.append(now); _RATE[ip] = hist; return True
+            _RATE[ip] = hist
+            return ('block', '오늘 요청이 많았어요. 잠시 후(또는 내일) 다시 시도해 주세요. 🌙')
+        hist.append(now); _RATE[ip] = hist
+        g = [t for t in _GLOBAL_AI if now - t < 86400]        # 전체 하루 상한(비용 안전판)
+        if len(g) >= AI_DAY_CAP:
+            _GLOBAL_AI[:] = g
+            return ('template', None)                         # AI 예산 소진 → 무료 템플릿으로 계속 제공(차단 아님)
+        g.append(now); _GLOBAL_AI[:] = g
+        return ('ok', None)
 
 # ── 책 배너 (URL은 판매 링크 나오면 교체) ──
 # 각 책의 서점별 링크. ▼▼ 나중에 실제 판매 주소로 교체 ▼▼ (없는 서점은 그 줄을 지우면 버튼도 사라짐)
@@ -131,7 +145,7 @@ def resolve_date(cal, y, m, d, leap):
     return y, m, d, None
 
 # ── 리포트 생성 ──
-def make_report(fields):
+def make_report(fields, force_template=False):
     warns = []
     y,mo,d,w1 = resolve_date(fields["cal"], fields["y"], fields["mo"], fields["d"], fields["leap"]);  warns += [w1] if w1 else []
     lat,lon,tz,place,w2 = resolve_place(fields["city"], fields["custom"]);  warns += [w2] if w2 else []
@@ -142,7 +156,7 @@ def make_report(fields):
     case = dict(palja=palja, **chart)
     a = G.analyze(case)
     key = os.environ.get("ANTHROPIC_API_KEY")
-    if ai_brush and key:
+    if ai_brush and key and not force_template:
         text, path = ai_brush.final_report(a, TIER, api_key=key, time_unknown=tu)
     else:
         text = G.render(a, TIER, time_unknown=tu)
@@ -455,8 +469,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def do_POST(self):
         if self.path != "/generate":
             self._send(form_page()); return
-        if not rate_ok(self._ip()):
-            self._send('<div class="card">오늘 요청이 많았어요. 잠시 후(또는 내일) 다시 시도해 주세요. 🌙</div>'); return
+        decision, msg = gate(self._ip())
+        if decision == "block":
+            self._send(f'<div class="card">{msg}</div>'); return
+        force_template = (decision == "template")
         n = int(self.headers.get("Content-Length", 0))
         q = urllib.parse.parse_qs(self.rfile.read(n).decode("utf-8"))
         g = lambda k, d="": q.get(k, [d])[0]
@@ -466,7 +482,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 y=int(g("y")), mo=int(g("mo")), d=int(g("d")),
                 hh=int(g("hh") or 12), mm=int(g("mm") or 0), time_unknown=(g("tu")=="on"),
                 city=g("city","서울"), custom=g("custom").strip())
-            text, palja, warns = make_report(fields)
+            text, palja, warns = make_report(fields, force_template=force_template)
             self._send(report_fragment(fields["name"], text, palja, warns))
         except Exception as e:
             self._send(f'<div class="card">입력값을 확인해 주세요. ({html.escape(str(e))})</div>', 400)
