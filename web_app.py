@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-「겹쳐읽기」 무료 자동 리포트 웹앱 v3 (확정 디자인 반영)
+「사주 별자리 성격 풀이」 무료 자동 리포트 웹앱 v3 (바깥이름=성격풀이 / 안쪽감성=겹쳐·두시계)
 - 디자인: 옥색 흰빛 배경 + 12사인·12지지 겹친 천문반 워터마크. 로고 없이 제목부터.
 - 입력: 양력/음력(+조건부 윤달) · 출생지(주요 도시 하드코딩 + 검색/지오코딩) · 시간 모름(정오)
 - 흐름: 입력 → (대기화면 스피너 + 배너) → 리포트 + 배너
@@ -342,7 +342,7 @@ function openBooks(e){e.preventDefault();document.getElementById('booksModal').c
 function closeBooks(){document.getElementById('booksModal').classList.add('hide');}
 function shareSite(){
   var url=location.origin+'/';
-  if(navigator.share){navigator.share({title:'사주와 별, 두 시계로 나를 겹쳐 봅니다',text:'사주와 점성술로 나를 교차 검토한 무료 리포트, 나도 받아봤어요 🌗',url:url}).catch(function(){});return;}
+  if(navigator.share){navigator.share({title:'사주 별자리 성격 풀이 — 두 시계가 가리키는 나',text:'사주랑 별자리로 내 성격 보는 무료 풀이, 나도 해봤어요 🌗',url:url}).catch(function(){});return;}
   if(navigator.clipboard){navigator.clipboard.writeText(url).catch(function(){});}
   var t=document.getElementById('copytoast');if(t){t.style.display='block';setTimeout(function(){t.style.display='none';},2000);}
 }
@@ -350,7 +350,7 @@ function submitForm(e){
   e.preventDefault();
   var out=document.getElementById('out');
   document.getElementById('top').style.display='none';   // 입력 폼 감추기(로딩 붕뜸 방지)
-  out.innerHTML='<div class="card loadcard"><div class="spin"></div><div class="loadmsg">사주와 별을 나란히 맞춰보는 중…</div></div>'
+  out.innerHTML='<div class="card loadcard"><div class="spin"></div><div class="loadmsg">두 시계를 겹쳐 맞춰보는 중…</div></div>'
     +document.getElementById('bnr').innerHTML;
   window.scrollTo({top:0,behavior:'smooth'});
   fetch('/generate',{method:'POST',body:new URLSearchParams(new FormData(f))})
@@ -364,9 +364,9 @@ function submitForm(e){
 
 PAGE = ("<!DOCTYPE html><html lang=ko><head><meta charset=utf-8>"
         "<meta name=viewport content='width=device-width,initial-scale=1'>"
-        "<title>겹쳐읽기 · 사주와 점성술로 보는 나</title>"
-        "<meta property='og:title' content='사주와 별, 두 시계로 나를 겹쳐 봅니다'>"
-        "<meta property='og:description' content='생년월일시만 넣으면 사주와 점성술로 나를 교차 검토한 리포트를 무료로 받아보세요.'>"
+        "<title>사주 별자리 성격 풀이 · 별과 사주로 보는 나</title>"
+        "<meta property='og:title' content='사주 별자리 성격 풀이 — 두 시계가 가리키는 나'>"
+        "<meta property='og:description' content='생년월일시만 넣으면 사주와 별자리가 함께 그려내는 내 성격을 무료로 받아봐요.'>"
         "<meta property='og:type' content='website'>"
         "<meta property='og:image' content='"+SITE_URL+"/og.png'>"
         "<meta property='og:url' content='"+SITE_URL+"/'>"
@@ -425,7 +425,7 @@ def report_fragment(name, text, palja, warns):
             + '<p class="discover">여기까지가 맛보기예요. 두 시계가 왜 같은 자리를 가리키는지, 그 겹침을 끝까지 따라가 보고 싶다면 —</p>'
             + book_banner()
             + '<button class="sharebtn" onclick="shareSite()">🔗 친구에게 소개하기</button>'
-            + '<div class="backlink"><a href="/">🔄 다른 사주 보기</a></div>')
+            + '<div class="backlink"><a href="/">🔄 다른 생일로 다시 보기</a></div>')
 
 class Handler(http.server.BaseHTTPRequestHandler):
     def _send(self, s, code=200):
