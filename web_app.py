@@ -169,7 +169,7 @@ def book_banner(heading="이 풀이의 원리가 궁금하다면"):
         f'<div class="mbt">{b.get("brtitle", b["title"])}</div></div>'
         for b in BOOKS)
     return (f'<div class="banner"><div class="bh">{heading}</div>'
-            f'<div class="bsub">사주와 별을 나란히 읽는 법 · 오승환 3부작</div>'
+            f'<div class="bsub">사주와 별을 나란히 읽는 법 · 별읽기 3부작</div>'
             f'<div class="bookrow">{covers}</div>'
             f'<a class="bookcta" href="/books" onclick="return openBooks(event)">책 보러 가기 →</a></div>')
 
@@ -416,13 +416,14 @@ def privacy_page():
     return PAGE.replace("%%BODY%%", PRIVACY)
 
 def report_fragment(name, text, palja, warns):
-    who = f"{name} 님 · " if name else ""
-    pj = " · ".join(a+b for a,b in palja)
-    who_line = f'<p class="who">🌗 {html.escape(who)}사주 {pj}</p>'
-    body_html = md(text).replace("</h2>", "</h2>\n" + who_line, 1)
+    # 사주 팔자는 사실상 생년월일이 드러나므로 리포트에 넣지 않음(공유 시 개인정보 보호)
+    who_line = f'<p class="who">🌗 {html.escape(name)} 님의 성격 풀이</p>' if name and name.strip() else ""
+    body_html = md(text)
+    if who_line:
+        body_html = body_html.replace("</h2>", "</h2>\n" + who_line, 1)
     w = "".join(f'<div class="warn">⚠️ {html.escape(x)}</div>' for x in warns)
     return (w + f'<div class="report card">{body_html}</div>'
-            + '<p class="discover">여기까지가 맛보기예요. 두 시계가 왜 같은 자리를 가리키는지, 끝까지 따라가 보고 싶다면 —</p>'
+            + '<p class="discover">여기까지가 맛보기예요. 두 시계가 왜 같은 자리를 가리키는지, 나머지는 아래에 담아두었어요.</p>'
             + book_banner()
             + '<button class="sharebtn" onclick="shareSite()">🔗 친구에게 소개하기</button>'
             + '<div class="backlink"><a href="/">🔄 다른 생일로 다시 보기</a></div>')
