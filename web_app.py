@@ -148,6 +148,12 @@ def resolve_date(cal, y, m, d, leap):
 def make_report(fields, force_template=False):
     warns = []
     y,mo,d,w1 = resolve_date(fields["cal"], fields["y"], fields["mo"], fields["d"], fields["leap"]);  warns += [w1] if w1 else []
+    # 음력 입력이 실제로 양력으로 변환됐을 때만 확인 줄 생성(변환 실패=경고 있을 땐 생략)
+    conv = None
+    if fields["cal"] == "음력" and not w1:
+        leaptag = "(윤달)" if fields["leap"] else ""
+        conv = (f'음력 {fields["y"]}년 {fields["mo"]}월 {fields["d"]}일{leaptag} '
+                f'→ 양력 {y}년 {mo}월 {d}일로 보았어요.')
     lat,lon,tz,place,w2 = resolve_place(fields["city"], fields["custom"]);  warns += [w2] if w2 else []
     tu = fields["time_unknown"]
     hh,mm = (12,0) if tu else (fields["hh"], fields["mm"])
@@ -160,7 +166,7 @@ def make_report(fields, force_template=False):
         text, path = ai_brush.final_report(a, TIER, api_key=key, time_unknown=tu)
     else:
         text = G.render(a, TIER, time_unknown=tu)
-    return text, palja, warns
+    return text, palja, warns, conv
 
 # ── 마크다운 → HTML ──
 def md(text):
@@ -258,6 +264,7 @@ button.go:active{transform:translateY(1px)}
 .loadmsg{color:var(--ink-soft);font-size:14.5px}
 .report h2{font-size:20px;color:var(--ink);margin:0 0 6px;line-height:1.4;font-weight:800}
 .report .who{font-size:13px;color:var(--muted);margin:0 0 18px}
+.report .conv{font-size:13px;color:var(--muted);margin:0 0 18px;padding:8px 12px;background:var(--jade-2);border-radius:9px}
 .report p{margin:0 0 15px;font-size:15.5px}
 .report strong{color:var(--ink);font-weight:700}
 .report hr{border:0;border-top:1px solid #eef1ee;margin:20px 0}
@@ -429,12 +436,13 @@ PRIVACY = """
 def privacy_page():
     return PAGE.replace("%%BODY%%", PRIVACY)
 
-def report_fragment(name, text, palja, warns):
+def report_fragment(name, text, palja, warns, conv=None):
     # 사주 팔자는 사실상 생년월일이 드러나므로 리포트에 넣지 않음(공유 시 개인정보 보호)
     who_line = f'<p class="who">🌗 {html.escape(name)} 님의 성격 풀이</p>' if name and name.strip() else ""
+    conv_line = f'<p class="conv">🌙 {html.escape(conv)}</p>' if conv else ""
     body_html = md(text)
-    if who_line:
-        body_html = body_html.replace("</h2>", "</h2>\n" + who_line, 1)
+    if who_line or conv_line:
+        body_html = body_html.replace("</h2>", "</h2>\n" + who_line + conv_line, 1)
     w = "".join(f'<div class="warn">⚠️ {html.escape(x)}</div>' for x in warns)
     return (w + f'<div class="report card">{body_html}</div>'
             + '<p class="discover">여기까지가 맛보기예요. 나머지 이야기는 아래에 담아두었어요.</p>'
@@ -482,8 +490,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 y=int(g("y")), mo=int(g("mo")), d=int(g("d")),
                 hh=int(g("hh") or 12), mm=int(g("mm") or 0), time_unknown=(g("tu")=="on"),
                 city=g("city","서울"), custom=g("custom").strip())
-            text, palja, warns = make_report(fields, force_template=force_template)
-            self._send(report_fragment(fields["name"], text, palja, warns))
+            text, palja, warns, conv = make_report(fields, force_template=force_template)
+            self._send(report_fragment(fields["name"], text, palja, warns, conv))
         except Exception as e:
             self._send(f'<div class="card">입력값을 확인해 주세요. ({html.escape(str(e))})</div>', 400)
 
