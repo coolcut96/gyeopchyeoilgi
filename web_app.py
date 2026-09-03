@@ -22,6 +22,8 @@ PORT = int(os.environ.get("PORT", 8000))   # 호스팅이 지정하는 포트 �
 CONTACT = "coolcut96@gmail.com"            # 처리방침 문의처 (교체 가능)
 SITE_URL = "https://port-0-gyeopchyeoilgi-ms6u5ojjac33edd8.sel3.cloudtype.app"  # 배포 주소(og:image 절대경로용)
 OG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "og.png")     # 카톡 미리보기 썸네일
+# 방문 분석(GoatCounter): 아래에 goatcounter 코드(가입 시 정한 서브도메인, 예 "gyeopchyeoilgi")를 넣으면 켜짐. 비우면 꺼짐.
+GOATCOUNTER_CODE = os.environ.get("GOATCOUNTER_CODE", "coolcut96")
 
 # ── 남용 방지: IP별 요청 제한 + 전체 비용 안전판 (in-memory) ──
 _RATE = {}                       # ip -> [timestamps]
@@ -388,6 +390,7 @@ function submitForm(e){
 </script>
 """
 
+_GC = (f"<script data-goatcounter='https://{GOATCOUNTER_CODE}.goatcounter.com/count' async src='//gc.zgo.at/count.js'></script>") if GOATCOUNTER_CODE else ""
 PAGE = ("<!DOCTYPE html><html lang=ko><head><meta charset=utf-8>"
         "<meta name=viewport content='width=device-width,initial-scale=1'>"
         "<title>사주 별자리 성격 풀이 · 별과 사주로 보는 나</title>"
@@ -398,7 +401,7 @@ PAGE = ("<!DOCTYPE html><html lang=ko><head><meta charset=utf-8>"
         "<meta property='og:url' content='"+SITE_URL+"/'>"
         "<meta name='twitter:card' content='summary_large_image'>"
         "<meta name='twitter:image' content='"+SITE_URL+"/og.png'>"
-        "<style>"+CSS+"</style></head>"
+        "<style>"+CSS+"</style>"+_GC+"</head>"
         "<body><div id=sky></div><div class=wrap>%%BODY%%</div>"
         "<script>"+ """
 (function(){var NS="http://www.w3.org/2000/svg",J="#5f9280";
@@ -433,13 +436,16 @@ PRIVACY = """
 <p><strong>2. 이용 목적</strong><br>입력하신 정보는 오직 <strong>그 자리에서 사주·점성술 리포트를 만드는 데에만</strong> 쓰입니다.</p>
 <p><strong>3. 보관 — 저장하지 않습니다</strong><br>입력값은 리포트를 만든 즉시 사라지며, <strong>서버에 따로 저장·기록하지 않습니다(보관 0일).</strong> 브라우저를 닫으면 아무 흔적도 남지 않습니다.</p>
 <p><strong>4. 제3자 처리</strong><br>리포트 <em>문장</em>을 다듬기 위해 AI(Anthropic Claude)에 판정 결과 재료가 전달될 수 있으나, <strong>생년월일 원본 자체는 전달되지 않으며</strong> 개인을 식별할 수 없는 형태로만 처리됩니다.</p>
-<p><strong>5. 문의</strong><br>개인정보 관련 문의: """ + CONTACT + """</p>
+%%ANALYTICS%%<p><strong>5. 문의</strong><br>개인정보 관련 문의: """ + CONTACT + """</p>
 <p style="margin-top:18px"><a href="/" style="color:var(--ink)">← 리포트 만들러 돌아가기</a></p>
 </div>
 <div class="foot">""" + PUBLISHER + """</div>
 """
 def privacy_page():
-    return PAGE.replace("%%BODY%%", PRIVACY)
+    analytics = ('<p><strong>4-1. 방문 통계 (익명)</strong><br>어떤 글이 얼마나 찾아오는지 파악하기 위해 '
+                 '쿠키 없는 익명 방문 분석(GoatCounter)을 사용합니다. 방문 수·유입 경로 같은 '
+                 '<strong>집계 정보만</strong> 보며, 개인을 식별하거나 입력하신 생년월일과 연결하지 않습니다.</p>') if GOATCOUNTER_CODE else ''
+    return PAGE.replace("%%BODY%%", PRIVACY.replace("%%ANALYTICS%%", analytics))
 
 def report_fragment(name, text, palja, warns, conv=None):
     # 사주 팔자는 사실상 생년월일이 드러나므로 리포트에 넣지 않음(공유 시 개인정보 보호)
