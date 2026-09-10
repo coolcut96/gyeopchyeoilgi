@@ -55,7 +55,7 @@ def gate(ip):
 # 각 책의 서점별 링크. ▼▼ 나중에 실제 판매 주소로 교체 ▼▼ (없는 서점은 그 줄을 지우면 버튼도 사라짐)
 BOOKS = [
     {"title": "별을 보다가 사주를 펼쳤다", "brtitle": "별을 보다가<br>사주를 펼쳤다", "sub": "사주인을 위한 점성술 입문", "cls": "c1", "emoji": "📘",
-     "stores": {"예스24": "https://www.yes24.com/product/goods/194750574", "알라딘": "", "리디북스": "https://ridibooks.com/books/805051233", "교보문고": ""}},
+     "stores": {"예스24": "https://www.yes24.com/product/goods/194750574", "알라딘": "https://www.aladin.co.kr/shop/wproduct.aspx?ItemId=401928192", "리디북스": "https://ridibooks.com/books/805051233", "교보문고": ""}},
     {"title": "여덟 글자 뒤의 별들", "brtitle": "여덟 글자<br>뒤의 별들", "sub": "점성술 렌즈로 본 사주의 구조", "cls": "c2", "emoji": "📗",
      "stores": {"예스24": "https://www.yes24.com/product/goods/195237163", "알라딘": "https://www.aladin.co.kr/shop/wproduct.aspx?ItemId=400603015", "리디북스": "https://ridibooks.com/books/805051309", "교보문고": ""}},
     {"title": "일단 해보자 점성술", "brtitle": "일단 해보자<br>점성술", "sub": "직접 따라 하며 익히는 실전 점성술", "cls": "c3", "emoji": "📙",
