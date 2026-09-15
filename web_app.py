@@ -24,6 +24,14 @@ SITE_URL = "https://port-0-gyeopchyeoilgi-ms6u5ojjac33edd8.sel3.cloudtype.app"  
 OG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "og.png")     # 카톡 미리보기 썸네일
 # 방문 분석(GoatCounter): 아래에 goatcounter 코드(가입 시 정한 서브도메인, 예 "gyeopchyeoilgi")를 넣으면 켜짐. 비우면 꺼짐.
 GOATCOUNTER_CODE = os.environ.get("GOATCOUNTER_CODE", "coolcut96")
+# 구글 서치 콘솔 소유확인 코드(메타태그 방식). 콘솔에서 받은 content 값을 넣으면 인증 태그가 붙음. 비우면 없음.
+GOOGLE_VERIFY = os.environ.get("GOOGLE_SITE_VERIFICATION", "")
+SITEMAP = ('<?xml version="1.0" encoding="UTF-8"?>'
+           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+           '<url><loc>'+SITE_URL+'/</loc><priority>1.0</priority></url>'
+           '<url><loc>'+SITE_URL+'/books</loc><priority>0.6</priority></url>'
+           '<url><loc>'+SITE_URL+'/privacy</loc><priority>0.3</priority></url>'
+           '</urlset>')
 
 # ── 남용 방지: IP별 요청 제한 + 전체 비용 안전판 (in-memory) ──
 _RATE = {}                       # ip -> [timestamps]
@@ -391,9 +399,11 @@ function submitForm(e){
 """
 
 _GC = (f"<script data-goatcounter='https://{GOATCOUNTER_CODE}.goatcounter.com/count' async src='//gc.zgo.at/count.js'></script>") if GOATCOUNTER_CODE else ""
+_GV = (f"<meta name='google-site-verification' content='{GOOGLE_VERIFY}'>") if GOOGLE_VERIFY else ""
 PAGE = ("<!DOCTYPE html><html lang=ko><head><meta charset=utf-8>"
-        "<meta name=viewport content='width=device-width,initial-scale=1'>"
+        "<meta name=viewport content='width=device-width,initial-scale=1'>"+_GV+
         "<title>사주 별자리 성격 풀이 · 별과 사주로 보는 나</title>"
+        "<meta name='description' content='사주 별자리 성격 풀이 — 생년월일시만 넣으면 사주와 별자리가 함께 그려내는 내 성격을 무료로 풀어드려요.'>"
         "<meta property='og:title' content='사주 별자리 성격 풀이 — 두 시계가 가리키는 나'>"
         "<meta property='og:description' content='생년월일시만 넣으면 사주와 별자리가 함께 그려내는 내 성격을 무료로 받아봐요.'>"
         "<meta property='og:type' content='website'>"
@@ -466,6 +476,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
         b = s.encode("utf-8")
         self.send_response(code); self.send_header("Content-Type","text/html; charset=utf-8")
         self.send_header("Content-Length", str(len(b))); self.end_headers(); self.wfile.write(b)
+    def _send_ct(self, s, ctype):
+        b = s.encode("utf-8")
+        self.send_response(200); self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(b))); self.end_headers(); self.wfile.write(b)
     def _ip(self):
         xff = self.headers.get("X-Forwarded-For")
         return xff.split(",")[0].strip() if xff else self.client_address[0]
@@ -484,6 +498,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self._send(books_page()); return
         if self.path == "/favicon.ico":
             self.send_response(204); self.end_headers(); return
+        if self.path.startswith("/robots.txt"):
+            self._send_ct("User-agent: *\nAllow: /\nSitemap: "+SITE_URL+"/sitemap.xml\n", "text/plain; charset=utf-8"); return
+        if self.path.startswith("/sitemap.xml"):
+            self._send_ct(SITEMAP, "application/xml; charset=utf-8"); return
         self._send(form_page())
     def do_POST(self):
         if self.path != "/generate":
