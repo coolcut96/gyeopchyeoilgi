@@ -514,6 +514,20 @@ class Handler(http.server.BaseHTTPRequestHandler):
                     "key_prefix": key[:7], "anthropic": anth,
                     "ai_brush_loaded": ai_brush is not None}
             self._send_ct(_json.dumps(info, ensure_ascii=False), "application/json"); return
+        if self.path.startswith("/aitest"):   # 임시 진단: 실제 API 직접 호출
+            import json as _json
+            out = {}
+            try:
+                import anthropic, ai_brush
+                model = getattr(ai_brush, "MODEL_PAID", "claude-haiku-4-5")
+                out["model"] = model
+                client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"), timeout=25.0, max_retries=0)
+                msg = client.messages.create(model=model, max_tokens=20,
+                        messages=[{"role":"user","content":"'ok'라고만 답해."}])
+                out["api"] = "OK"; out["reply"] = msg.content[0].text[:60]
+            except Exception as e:
+                out["api"] = "ERROR"; out["error_type"] = type(e).__name__; out["error"] = str(e)[:300]
+            self._send_ct(_json.dumps(out, ensure_ascii=False), "application/json"); return
         self._send(form_page())
     def do_POST(self):
         if self.path != "/generate":
