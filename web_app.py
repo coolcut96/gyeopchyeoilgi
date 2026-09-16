@@ -502,6 +502,18 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self._send_ct("User-agent: *\nAllow: /\nSitemap: "+SITE_URL+"/sitemap.xml\n", "text/plain; charset=utf-8"); return
         if self.path.startswith("/sitemap.xml"):
             self._send_ct(SITEMAP, "application/xml; charset=utf-8"); return
+        if self.path.startswith("/health"):   # 임시 진단(키 값은 노출 안 함)
+            import json as _json
+            key = os.environ.get("ANTHROPIC_API_KEY") or ""
+            try:
+                import anthropic as _a
+                anth = "OK v" + getattr(_a, "__version__", "?")
+            except Exception as e:
+                anth = "MISSING: " + str(e)[:80]
+            info = {"key_present": bool(key), "key_len": len(key),
+                    "key_prefix": key[:7], "anthropic": anth,
+                    "ai_brush_loaded": ai_brush is not None}
+            self._send_ct(_json.dumps(info, ensure_ascii=False), "application/json"); return
         self._send(form_page())
     def do_POST(self):
         if self.path != "/generate":
