@@ -502,37 +502,6 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self._send_ct("User-agent: *\nAllow: /\nSitemap: "+SITE_URL+"/sitemap.xml\n", "text/plain; charset=utf-8"); return
         if self.path.startswith("/sitemap.xml"):
             self._send_ct(SITEMAP, "application/xml; charset=utf-8"); return
-        if self.path.startswith("/health"):   # 임시 진단(키 값은 노출 안 함)
-            import json as _json
-            key = os.environ.get("ANTHROPIC_API_KEY") or ""
-            try:
-                import anthropic as _a
-                anth = "OK v" + getattr(_a, "__version__", "?")
-            except Exception as e:
-                anth = "MISSING: " + str(e)[:80]
-            info = {"key_present": bool(key), "key_len": len(key),
-                    "key_prefix": key[:7], "anthropic": anth,
-                    "ai_brush_loaded": ai_brush is not None}
-            self._send_ct(_json.dumps(info, ensure_ascii=False), "application/json"); return
-        if self.path.startswith("/aitest"):   # 임시 진단: 실제 리포트 생성 후 강등 여부 확인
-            import json as _json
-            out = {}
-            try:
-                from auto_chart import compute_palja
-                palja = compute_palja(1988,7,22,14,10, 126.9780, "Asia/Seoul")
-                chart = ephemeris.compute_chart(1988,7,22,14,10, 37.5665,126.9780, "Asia/Seoul")
-                a = G.analyze(dict(palja=palja, **chart))
-                r = ai_brush.ai_render(a, TIER, api_key=os.environ.get("ANTHROPIC_API_KEY"))
-                if r is None: out["result"] = "None(키/라이브러리 없음)"
-                elif r.get("error"): out["result"]="API오류"; out["error"]=r["error"][:200]
-                else:
-                    out["result"] = "AI 생성됨"
-                    out["leaks"] = r.get("leaks")
-                    out["downgraded"] = bool(r.get("leaks"))
-                    out["text_sample"] = (r.get("text") or "")[:180]
-            except Exception as e:
-                out["result"]="예외"; out["error_type"]=type(e).__name__; out["error"]=str(e)[:200]
-            self._send_ct(_json.dumps(out, ensure_ascii=False), "application/json"); return
         self._send(form_page())
     def do_POST(self):
         if self.path != "/generate":
